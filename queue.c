@@ -17,6 +17,7 @@ queue_t *q_new()
     }
 
     q->head = NULL;
+    q->tail = NULL;
     q->size = 0;
 
     return q;
@@ -25,15 +26,13 @@ queue_t *q_new()
 /* Free all storage used by queue */
 void q_free(queue_t *q)
 {
-    /* TODO: How about freeing the list elements and the strings? */
-    /* Free queue structure */
     list_ele_t *temp;
 
     if (!q) {
         return;
     }
 
-    for (temp = q->head; temp; temp = q->head) {
+    for (temp = q->head; temp != NULL; temp = q->head) {
         if (temp->value) {
             free(temp->value);
         }
@@ -54,17 +53,18 @@ void q_free(queue_t *q)
 bool q_insert_head(queue_t *q, char *s)
 {
     list_ele_t *newh;
-    size_t length = strlen(s);
+    size_t length;
 
     if (!q) {
-        return NULL;
+        return false;
     }
 
     newh = malloc(sizeof(list_ele_t));
     if (!newh) {
-        return NULL;
+        return false;
     }
 
+    length = strlen(s);
     newh->value = malloc(length + 1);
     if (!newh->value) {
         free(newh);
@@ -77,6 +77,12 @@ bool q_insert_head(queue_t *q, char *s)
     newh->next = q->head;
     q->head = newh;
     q->size++;
+
+    /* if there is only one element in queue, set the newh as q->tail too */
+    if (q->size == 1) {
+        q->tail = newh;
+    }
+
     return true;
 }
 
@@ -89,10 +95,39 @@ bool q_insert_head(queue_t *q, char *s)
  */
 bool q_insert_tail(queue_t *q, char *s)
 {
-    /* TODO: You need to write the complete code for this function */
-    /* Remember: It should operate in O(1) time */
-    /* TODO: Remove the above comment when you are about to implement. */
-    return false;
+    list_ele_t *newt;
+    size_t length;
+
+    if (!q) {
+        return false;
+    }
+
+    newt = malloc(sizeof(list_ele_t));
+    if (!newt) {
+        return false;
+    }
+
+    length = strlen(s);
+    newt->value = malloc(length + 1);
+    if (!newt->value) {
+        free(newt);
+        return false;
+    }
+
+    memset(newt->value, 0, length + 1);  // Clear the allocated memory to zero
+    strncpy(newt->value, s, length);
+
+    newt->next = NULL;
+    q->tail->next = newt;
+    q->tail = newt;
+    q->size++;
+
+    /* if there is only one element in queue, set the newt as q->head too */
+    if (q->size == 1) {
+        q->head = newt;
+    }
+
+    return true;
 }
 
 /*
@@ -128,6 +163,10 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
     free(original_head);
     q->size--;
 
+    /* if there is no element in queue, just set the q->tail to NULL too */
+    if (q->size == 0) {
+        q->tail = NULL;
+    }
     return true;
 }
 
@@ -137,6 +176,10 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
  */
 int q_size(queue_t *q)
 {
+    if (!q) {
+        return 0;
+    }
+
     return q->size;
 }
 
