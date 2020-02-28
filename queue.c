@@ -32,12 +32,14 @@ void q_free(queue_t *q)
         return;
     }
 
-    for (temp = q->head; temp != NULL; temp = q->head) {
+    temp = q->head;
+    while (temp) {
         if (temp->value) {
             free(temp->value);
         }
         q->head = q->head->next;
         free(temp);
+        temp = q->head;
     }
 
     free(q);
@@ -176,11 +178,7 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
  */
 int q_size(queue_t *q)
 {
-    if (!q) {
-        return 0;
-    }
-
-    return q->size;
+    return q == NULL ? 0 : q->size;
 }
 
 /*
@@ -192,8 +190,22 @@ int q_size(queue_t *q)
  */
 void q_reverse(queue_t *q)
 {
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
+    if (!q || q->size == 0 || q->size == 1) {
+        return;
+    }
+
+    list_ele_t *former, *latter;
+    former = q->head;
+    latter = NULL;
+
+    q->tail = q->head;
+    while (former) {
+        q->head = q->head->next;
+        former->next = latter;
+        latter = former;
+        former = q->head;
+    }
+    q->head = latter;
 }
 
 /*
