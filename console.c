@@ -75,6 +75,8 @@ static bool do_log_cmd(int argc, char *argv[]);
 static bool do_time_cmd(int argc, char *argv[]);
 static bool do_comment_cmd(int argc, char *argv[]);
 
+static bool do_hello(int argc, char *argv[]);
+
 static void init_in();
 
 static bool push_file(char *fname);
@@ -99,6 +101,7 @@ void init_cmd()
     add_cmd("log", do_log_cmd, " file           | Copy output to file");
     add_cmd("time", do_time_cmd, " cmd arg ...    | Time command execution");
     add_cmd("#", do_comment_cmd, " ...            | Display comment");
+    add_cmd("hello", do_hello, "                | Print hello message");
     add_param("simulation", (int *) &simulation, "Start/Stop simulation mode",
               NULL);
     add_param("verbose", &verblevel, "Verbosity level", NULL);
@@ -629,4 +632,9 @@ bool run_console(char *infile_name)
     while (!cmd_done())
         cmd_select(0, NULL, NULL, NULL, NULL);
     return err_cnt == 0;
+}
+
+static bool do_hello(int argc, char *argv[])
+{
+    return (bool) printf("Hello, World!\n");
 }
