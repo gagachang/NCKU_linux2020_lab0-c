@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O1 -g -Wall -Werror -Idudect -I.
+CFLAGS = -O1 -g -Wall -Werror -Idudect -Inatsort -I.
 
 GIT_HOOKS := .git/hooks/applied
 DUT_DIR := dudect

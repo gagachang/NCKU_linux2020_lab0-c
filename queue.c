@@ -3,8 +3,8 @@
 #include <string.h>
 
 #include "harness.h"
-#include "natsort/strnatcmp.h"
 #include "queue.h"
+#include "strnatcmp.h"
 
 /*
  * Create empty queue.
