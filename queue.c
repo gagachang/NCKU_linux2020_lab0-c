@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "harness.h"
+#include "natsort/strnatcmp.h"
 #include "queue.h"
 
 /*
@@ -32,14 +33,12 @@ void q_free(queue_t *q)
         return;
     }
 
-    temp = q->head;
-    while (temp) {
+    while ((temp = q->head) != NULL) {
         if (temp->value) {
             free(temp->value);
         }
         q->head = q->head->next;
         free(temp);
-        temp = q->head;
     }
 
     free(q);
@@ -70,18 +69,19 @@ bool q_insert_head(queue_t *q, char *s)
     newh->value = malloc(length + 1);
     if (!newh->value) {
         free(newh);
+        newh = NULL;
         return false;
     }
 
-    memset(newh->value, 0, length + 1);  // Clear the allocated memory to zero
     strncpy(newh->value, s, length);
+    newh->value[length] = '\0';
 
     newh->next = q->head;
     q->head = newh;
     q->size++;
 
     /* if there is only one element in queue, set the newh as q->tail too */
-    if (q->size == 1) {
+    if (!q->tail) {
         q->tail = newh;
     }
 
@@ -113,14 +113,18 @@ bool q_insert_tail(queue_t *q, char *s)
     newt->value = malloc(length + 1);
     if (!newt->value) {
         free(newt);
+        newt = NULL;
         return false;
     }
 
-    memset(newt->value, 0, length + 1);  // Clear the allocated memory to zero
     strncpy(newt->value, s, length);
+    newt->value[length] = '\0';
 
     newt->next = NULL;
-    q->tail->next = newt;
+
+    if (q->tail) {
+        q->tail->next = newt;
+    }
     q->tail = newt;
     q->size++;
 
@@ -163,6 +167,7 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
         free(original_head->value);
     }
     free(original_head);
+    original_head = NULL;
     q->size--;
 
     /* if there is no element in queue, just set the q->tail to NULL too */
@@ -215,6 +220,82 @@ void q_reverse(queue_t *q)
  */
 void q_sort(queue_t *q)
 {
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
+    if (!q || q->head == NULL || q->size < 2) {
+        return;
+    }
+
+    q->head = merge_sort_list(q->head);
+
+    // find the new q->tail
+    list_ele_t *tail = q->head;
+    while (tail->next) {
+        tail = tail->next;
+    }
+    q->tail = tail;
+}
+
+list_ele_t *merge(list_ele_t *left, list_ele_t *right)
+{
+    // merge with recursive
+    if (!right)
+        return left;
+    if (!left)
+        return right;
+
+    list_ele_t *head, *temp;
+
+    // find the head of the two splitted lists
+    if (strnatcmp(left->value, right->value) < 0) {
+        head = left;
+        left = left->next;
+    } else {
+        head = right;
+        right = right->next;
+    }
+
+    // keep sorting
+    temp = head;
+
+    while (left && right) {
+        if (strnatcmp(left->value, right->value) < 0) {
+            temp->next = left;
+            left = left->next;
+        } else {
+            temp->next = right;
+            right = right->next;
+        }
+        temp = temp->next;
+    }
+
+    // check if there is a rest element
+    if (left)
+        temp->next = left;
+    if (right)
+        temp->next = right;
+
+    return head;
+}
+
+list_ele_t *merge_sort_list(list_ele_t *head)
+{
+    if (!head || !head->next)
+        return head;
+
+    list_ele_t *fast = head->next;
+    list_ele_t *slow = head;
+
+    // split list
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    fast = slow->next;
+    slow->next = NULL;
+
+    // sort each list
+    list_ele_t *left = merge_sort_list(head);
+    list_ele_t *right = merge_sort_list(fast);
+
+    // merge
+    return merge(left, right);
 }

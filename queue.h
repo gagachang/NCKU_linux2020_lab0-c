@@ -93,4 +93,10 @@ void q_reverse(queue_t *q);
  */
 void q_sort(queue_t *q);
 
+/*
+ * Use merge sort to sort our queue
+ */
+list_ele_t *merge(list_ele_t *left, list_ele_t *right);
+list_ele_t *merge_sort_list(list_ele_t *head);
+
 #endif /* LAB0_QUEUE_H */
